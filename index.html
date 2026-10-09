@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Links</title>
+  <meta name="description" content="All my links in one place.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="style.css">
+  <style>html, body { margin: 0; height: 100%; } body { background: #111; }</style>
+</head>
+<body>
+  <div id="root" class="lt-root"></div>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+  <script>
+    const cfg = window.LINKTREE;
+    const root = document.getElementById("root");
+    LinkInBio.render(cfg, root);
+    document.title = cfg.profile?.name ? `${cfg.profile.name} | Links` : "Links";
+    document.body.style.background = getComputedStyle(root).getPropertyValue("--lt-bg");
+  </script>
+</body>
+</html>

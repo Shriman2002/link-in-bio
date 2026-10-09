@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Link Page Editor</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    :root { --bg:#f4f4f5; --panel:#fff; --ink:#18181b; --sub:#71717a; --line:#e4e4e7; --brand:#fe2c55; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 14px/1.45 system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--ink); }
+    .app { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 24px; max-width: 1180px; margin: 0 auto; padding: 24px 16px; }
+    @media (max-width: 900px) { .app { grid-template-columns: 1fr; } .preview-col { order: -1; } }
+    h1 { font-size: 20px; margin: 0 0 4px; } .lede { color: var(--sub); margin: 0 0 20px; }
+    section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    section h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--sub); margin: 0 0 12px; }
+    label { display: block; font-weight: 600; font-size: 12px; margin: 10px 0 4px; }
+    input[type=text], input[type=url], textarea, select { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; font: inherit; background: #fff; color: var(--ink); }
+    textarea { resize: vertical; min-height: 60px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } .row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    @media (max-width: 520px) { .row, .row3 { grid-template-columns: 1fr; } }
+    .item { border: 1px solid var(--line); border-radius: 10px; padding: 10px; margin-bottom: 10px; background: #fafafa; }
+    .item-grid { display: grid; grid-template-columns: 2fr 3fr 1fr; gap: 8px; }
+    @media (max-width: 620px) { .item-grid { grid-template-columns: 1fr; } }
+    .item-actions { display: flex; gap: 6px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+    .item-actions label { display: inline-flex; gap: 6px; align-items: center; margin: 0 auto 0 0; font-weight: 500; }
+    button { font: inherit; border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+    button:hover { background: #f4f4f5; }
+    button.primary { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 600; padding: 10px 16px; }
+    button.primary:hover { filter: brightness(.95); }
+    .colors { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+    .colors label { display: flex; align-items: center; gap: 8px; font-weight: 500; margin: 0; }
+    .colors input[type=color] { width: 34px; height: 28px; border: 1px solid var(--line); border-radius: 6px; padding: 0; background: none; }
+    .hint { color: var(--sub); font-size: 12px; margin: 6px 0 0; }
+    .preview-col { position: sticky; top: 24px; align-self: start; }
+    .phone { width: 100%; max-width: 390px; height: 760px; max-height: calc(100vh - 140px); margin: 0 auto; border: 10px solid #18181b; border-radius: 44px; overflow: hidden; background: #111; }
+    .phone .lt-root { height: 100%; overflow-y: auto; background-attachment: scroll; }
+    .actions { display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div>
+      <h1>Link page editor</h1>
+      <p class="lede">Edit on the left and the preview updates live. When you're done, click <b>Download config.js</b> and replace the one next to <code>index.html</code>.</p>
+
+      <section>
+        <h2>Profile</h2>
+        <div class="row">
+          <div><label for="p-name">Name</label><input id="p-name" type="text" data-bind="profile.name"></div>
+          <div><label for="p-handle">Handle</label><input id="p-handle" type="text" data-bind="profile.handle"></div>
+        </div>
+        <label for="p-bio">Bio</label><textarea id="p-bio" data-bind="profile.bio"></textarea>
+        <label for="p-avatar">Avatar image URL or file name</label><input id="p-avatar" type="text" data-bind="profile.avatar">
+        <p class="hint">Put a photo like <code>avatar.jpg</code> in the same folder and type its name here.</p>
+      </section>
+
+      <section>
+        <h2>Look</h2>
+        <div class="row3">
+          <div><label for="t-preset">Theme</label><select id="t-preset" data-bind="theme.preset"></select></div>
+          <div><label for="t-font">Font</label><select id="t-font" data-bind="theme.font"></select></div>
+          <div><label for="t-shape">Button shape</label><select id="t-shape" data-bind="theme.buttonShape"></select></div>
+        </div>
+        <label>Color overrides</label>
+        <div class="colors" id="colors"></div>
+        <p class="hint">Changing a color overrides the theme. <button type="button" id="reset-colors">Reset to theme</button></p>
+      </section>
+
+      <section>
+        <h2>Links</h2>
+        <div id="links"></div>
+        <button type="button" id="add-link">+ Add link</button>
+        <p class="hint">Icon can be a platform name (tiktok, youtube, spotify, amazon, email, website…) or an emoji like 🛍️. "Highlight" makes the link stand out with your accent color.</p>
+      </section>
+
+      <section>
+        <h2>Social icons</h2>
+        <div id="socials"></div>
+        <button type="button" id="add-social">+ Add social</button>
+      </section>
+
+      <section>
+        <h2>Footer</h2>
+        <input type="text" data-bind="footer" placeholder="Optional small text at the bottom">
+      </section>
+    </div>
+
+    <div class="preview-col">
+      <div class="phone"><div id="preview" class="lt-root"></div></div>
+      <div class="actions">
+        <button class="primary" id="download">Download config.js</button>
+        <button id="revert">Revert to saved config.js</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+  <script>
+    const { render, THEMES, FONTS, PLATFORMS, RADII } = LinkInBio;
+    const DRAFT_KEY = "linkinbio-draft";
+    const clone = (o) => JSON.parse(JSON.stringify(o));
+    let state;
+    try { state = JSON.parse(localStorage.getItem(DRAFT_KEY)) || clone(window.LINKTREE); } catch { state = clone(window.LINKTREE); }
+    state.theme ||= {}; state.theme.overrides ||= {}; state.links ||= []; state.socials ||= [];
+
+    const $ = (s) => document.querySelector(s);
+    const get = (path) => path.split(".").reduce((o, k) => o?.[k], state);
+    const set = (path, v) => { const ks = path.split("."); const last = ks.pop(); ks.reduce((o, k) => (o[k] ||= {}), state)[last] = v; };
+    const fill = (sel, opts) => { sel.innerHTML = opts.map((o) => `<option value="${o}">${o}</option>`).join(""); };
+
+    fill($("#t-preset"), Object.keys(THEMES));
+    fill($("#t-font"), FONTS);
+    fill($("#t-shape"), Object.keys(RADII));
+
+    function update() {
+      render(state, $("#preview"));
+      try { localStorage.setItem(DRAFT_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    document.querySelectorAll("[data-bind]").forEach((el) => {
+      el.value = get(el.dataset.bind) ?? "";
+      el.addEventListener("input", () => { set(el.dataset.bind, el.value); if (el.dataset.bind === "theme.preset") renderColors(); update(); });
+    });
+
+    const COLOR_KEYS = { text: "Text", muted: "Subtext", button: "Button", buttonText: "Button text", buttonBorder: "Border", accent: "Accent", bg: "Background" };
+    const toHex = (c) => { const m = /^#([0-9a-f]{6})$/i.exec(c || ""); if (m) return c; const d = document.createElement("div"); d.style.color = c; document.body.appendChild(d); const rgb = getComputedStyle(d).color.match(/\d+/g) || [0,0,0]; d.remove(); return "#" + rgb.slice(0, 3).map((n) => (+n).toString(16).padStart(2, "0")).join(""); };
+    const firstColor = (v) => (String(v).match(/#[0-9a-f]{6}|rgba?\([^)]+\)/i) || [v])[0];
+    function renderColors() {
+      const base = Object.assign({}, THEMES[state.theme.preset] || THEMES.midnight, state.theme.overrides);
+      $("#colors").innerHTML = Object.entries(COLOR_KEYS).map(([k, label]) =>
+        `<label><input type="color" data-color="${k}" value="${toHex(firstColor(base[k]))}">${label}</label>`).join("");
+      $("#colors").querySelectorAll("input").forEach((inp) => inp.addEventListener("input", () => { state.theme.overrides[inp.dataset.color] = inp.value; update(); }));
+    }
+    $("#reset-colors").onclick = () => { state.theme.overrides = {}; renderColors(); update(); };
+
+    function listEditor(container, key, fields, makeNew) {
+      const draw = () => {
+        const arr = state[key];
+        container.innerHTML = arr.map((item, i) => `
+          <div class="item" data-i="${i}">
+            <div class="item-grid">${fields.map((f) => f.type === "select"
+              ? `<select data-f="${f.name}" aria-label="${f.label}">${f.options.map((o) => `<option ${o === item[f.name] ? "selected" : ""}>${o}</option>`).join("")}</select>`
+              : `<input type="text" data-f="${f.name}" placeholder="${f.label}" aria-label="${f.label}">`).join("")}</div>
+            <div class="item-actions">
+              ${key === "links" ? `<label><input type="checkbox" data-f="highlight" ${item.highlight ? "checked" : ""}> Highlight</label>` : "<span style='margin-right:auto'></span>"}
+              <button type="button" data-act="up" ${i === 0 ? "disabled" : ""}>↑</button>
+              <button type="button" data-act="down" ${i === arr.length - 1 ? "disabled" : ""}>↓</button>
+              <button type="button" data-act="del">Delete</button>
+            </div>
+          </div>`).join("");
+        container.querySelectorAll(".item").forEach((row) => {
+          const i = +row.dataset.i;
+          row.querySelectorAll("input[type=text]").forEach((inp) => { inp.value = arr[i][inp.dataset.f] ?? ""; });
+          row.querySelectorAll("[data-f]").forEach((inp) => inp.addEventListener("input", () => {
+            arr[i][inp.dataset.f] = inp.type === "checkbox" ? inp.checked : inp.value; update();
+          }));
+          row.querySelectorAll("[data-act]").forEach((btn) => btn.addEventListener("click", () => {
+            const a = btn.dataset.act;
+            if (a === "del") arr.splice(i, 1);
+            else { const j = a === "up" ? i - 1 : i + 1; [arr[i], arr[j]] = [arr[j], arr[i]]; }
+            draw(); update();
+          }));
+        });
+      };
+      return { draw, add: () => { state[key].push(makeNew()); draw(); update(); } };
+    }
+
+    const links = listEditor($("#links"), "links",
+      [{ name: "title", label: "Title" }, { name: "url", label: "https://…" }, { name: "icon", label: "Icon" }],
+      () => ({ title: "New link", url: "https://", icon: "website" }));
+    const socials = listEditor($("#socials"), "socials",
+      [{ name: "platform", label: "Platform", type: "select", options: PLATFORMS }, { name: "url", label: "https://…" }],
+      () => ({ platform: "instagram", url: "https://" }));
+    $("#add-link").onclick = links.add;
+    $("#add-social").onclick = socials.add;
+
+    $("#download").onclick = () => {
+      const src = "// Generated by editor.html — replace config.js with this file.\nwindow.LINKTREE = " + JSON.stringify(state, null, 2) + ";\n";
+      const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(new Blob([src], { type: "text/javascript" })), download: "config.js" });
+      a.click(); URL.revokeObjectURL(a.href);
+    };
+    $("#revert").onclick = () => {
+      if (!confirm("Discard your edits and reload from config.js?")) return;
+      try { localStorage.removeItem(DRAFT_KEY); } catch {}
+      location.reload();
+    };
+
+    renderColors(); links.draw(); socials.draw(); update();
+  </script>
+</body>
+</html>
