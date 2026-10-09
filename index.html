@@ -12,14 +12,16 @@
 </head>
 <body>
   <div id="root" class="lt-root"></div>
-  <script src="config.js"></script>
-  <script src="app.js"></script>
   <script>
-    const cfg = window.LINKTREE;
-    const root = document.getElementById("root");
-    LinkInBio.render(cfg, root);
-    document.title = cfg.profile?.name ? `${cfg.profile.name} | Links` : "Links";
-    document.body.style.background = getComputedStyle(root).getPropertyValue("--lt-bg");
+    // Cache-bust so edits to config.js / app.js show up immediately after a push.
+    const load = (src) => new Promise((ok, fail) => document.head.appendChild(Object.assign(document.createElement("script"), { src: `${src}?t=${Date.now()}`, onload: ok, onerror: fail })));
+    Promise.all([load("config.js"), load("app.js")]).then(() => {
+      const cfg = window.LINKTREE;
+      const root = document.getElementById("root");
+      LinkInBio.render(cfg, root);
+      document.title = cfg.profile?.name ? `${cfg.profile.name} | Links` : "Links";
+      document.body.style.background = getComputedStyle(root).getPropertyValue("--lt-bg");
+    });
   </script>
 </body>
 </html>
