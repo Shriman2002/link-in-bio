@@ -4,7 +4,7 @@ window.LINKTREE = {
     name: "Shreya",
     handle: "@shreyasel",
     bio: "Links below 👇",
-    avatar: "https://api.dicebear.com/9.x/shapes/svg?seed=linkinbio" // or "avatar.jpg" placed next to index.html
+    avatar: "avatar.jpg" // or "avatar.jpg" placed next to index.html
   },
   theme: {
     preset: "midnight",   // midnight | sunset | minimal | neon | forest
